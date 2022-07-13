@@ -7,7 +7,7 @@ const routes = [
   {
     path: '/login',
     component: () => {
-      return import('@/views/login/LoginIndex')
+      return import('@/views/login')
     }
   }
 ]
