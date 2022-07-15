@@ -12,14 +12,33 @@ const routes = [
   },
   {
     path: '/',
+    redirect: '/ ',
     component: () => {
-      return import('@/views/layout')
+      return import('@/views/Layout')
     },
     children: [
       {
-        path: '/',
+        path: '/ ',
         component: () => {
-          return import('@/views/layout')
+          return import('@/views/Home')
+        }
+      },
+      {
+        path: '/video',
+        component: () => {
+          return import('@/views/Video')
+        }
+      },
+      {
+        path: '/qa',
+        component: () => {
+          return import('@/views/QA')
+        }
+      },
+      {
+        path: '/my',
+        component: () => {
+          return import('@/views/My')
         }
       }
     ]
