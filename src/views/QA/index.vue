@@ -1,5 +1,5 @@
 <template>
-  <div>首页</div>
+  <div>问答</div>
 </template>
 
 <script>
