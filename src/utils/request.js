@@ -1,5 +1,6 @@
 import axios from 'axios'
 const request = axios.create({
-  baseURL: ''
+  baseURL: 'http://toutiao.itheima.net'
+  // timeout: 3000
 })
 export default request

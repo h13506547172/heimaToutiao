@@ -9,6 +9,20 @@ const routes = [
     component: () => {
       return import('@/views/login')
     }
+  },
+  {
+    path: '/',
+    component: () => {
+      return import('@/views/layout')
+    },
+    children: [
+      {
+        path: '/',
+        component: () => {
+          return import('@/views/layout')
+        }
+      }
+    ]
   }
 ]
 
