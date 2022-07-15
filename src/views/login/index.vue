@@ -13,13 +13,7 @@
         maxlength="11"
         name="phoneNum"
         placeholder="请输入11位手机号"
-        :rules="[
-          { required: true, message: '请填写手机号' },
-          {
-            pattern: /^(?:(?:\+|00)86)?1[3-9]\d{9}$/,
-            message: '请填写正确的手机号'
-          }
-        ]"
+        :rules="phoneRules"
       >
         <template #left-icon>
           <i class="iconfont icon-shouji"></i>
@@ -31,13 +25,7 @@
         maxlength="6"
         name="phoneNum"
         placeholder="请输入验证码"
-        :rules="[
-          { required: true, message: '请填写验证码' },
-          {
-            pattern: /^\d{6}$/,
-            message: '请填写正确的验证码'
-          }
-        ]"
+        :rules="codeRules"
       >
         <template #left-icon>
           <i class="iconfont icon-yanzhengma"></i>
@@ -68,9 +56,14 @@
 
 <script>
 import { loginAPI, sendSmsAPI } from '@/api/index'
+// 引入手机校验规则,引入的校验规则要先在data注册
+import { phoneRules, codeRules } from './loginRules'
 export default {
   data() {
     return {
+      // 表单校验规则
+      phoneRules,
+      codeRules,
       countDownShow: false,
       // 手机输入框内容和验证码内容
       user: {
@@ -82,9 +75,14 @@ export default {
   methods: {
     // 点击提交,满足规则触发提交事件
     async onSubmit() {
+      this.$toast.loading({
+        message: '加载中...',
+        forbidClick: true
+      })
       try {
         const res = await loginAPI(this.user)
         // console.log(res)
+        this.$toast.success('登录成功')
         // 将token存入vuex中并存入本地
         this.$store.commit('setUserToken', res.data.data)
         this.$router.back()
