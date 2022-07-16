@@ -8,18 +8,18 @@
         <!-- 展示用户信息 -->
         <van-row class="row2">
           <!-- 头像手机号 -->
-          <van-col span="12">
+          <van-col span="14">
             <van-row type="flex" justify="space-around" align="center">
               <van-image
                 round
                 width="1.76rem"
                 height="1.76rem"
-                src="https://img01.yzcdn.cn/vant/cat.jpeg"
+                :src="infoObj.photo"
               />
-              <span class="mob">13911111111</span>
+              <span class="mob">{{ infoObj.name }}</span>
             </van-row>
           </van-col>
-          <van-col span="11">
+          <van-col span="9">
             <van-row type="flex" justify="end" align="center">
               <van-button round class="codeBtn">编辑信息</van-button>
             </van-row>
@@ -30,27 +30,28 @@
           <van-grid :border="false">
             <van-grid-item text="头条">
               <template #icon>
-                <span class="icon-num">0</span>
+                <span class="icon-num">{{ infoObj.art_count }}</span>
               </template>
             </van-grid-item>
             <van-grid-item text="粉丝">
               <template #icon>
-                <span class="icon-num">0</span>
+                <span class="icon-num">{{ infoObj.fans_count }}</span>
               </template>
             </van-grid-item>
             <van-grid-item text="关注">
               <template #icon>
-                <span class="icon-num">0</span>
+                <span class="icon-num">{{ infoObj.follow_count }}</span>
               </template>
             </van-grid-item>
             <van-grid-item text="获赞">
               <template #icon>
-                <span class="icon-num">0</span>
+                <span class="icon-num">{{ infoObj.like_count }}</span>
               </template>
             </van-grid-item>
           </van-grid>
         </van-row>
       </div>
+      <!-- 未登录的盒子 -->
       <div class="login-register banner" v-else>
         <div class="goLogin" @click="goLoginFn">
           <img src="../../assets/image/mobile.png" alt="" />
@@ -83,7 +84,13 @@
 </template>
 
 <script>
+import { myInfoAPI } from '@/api/index'
 export default {
+  data() {
+    return {
+      infoObj: {}
+    }
+  },
   computed: {
     isLogin() {
       // 两个取反，变成他状态的布尔值
@@ -106,6 +113,19 @@ export default {
     },
     goLoginFn() {
       this.$router.push('/login')
+    }
+  },
+  async created() {
+    if (!this.$store.state.userToken.token) {
+      return console.log('无token')
+    }
+
+    try {
+      const res = await myInfoAPI()
+      console.log(res)
+      this.infoObj = res.data.data
+    } catch (err) {
+      console.log(err)
     }
   }
 }

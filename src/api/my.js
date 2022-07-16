@@ -1,9 +1,8 @@
 import request from '@/utils/request'
 
-export const myInfo = (data) => {
+export const myInfo = () => {
   return request({
-    method: 'POST',
-    url: '/v1_0/authorizations',
-    data
+    method: 'GET',
+    url: '/v1_0/user'
   })
 }
