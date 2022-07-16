@@ -14,13 +14,13 @@ const routes = [
     path: '/',
     redirect: '/ ',
     component: () => {
-      return import('@/views/Layout')
+      return import('@/views/layout')
     },
     children: [
       {
         path: '/ ',
         component: () => {
-          return import('@/views/Home')
+          return import('@/views/home')
         }
       },
       {
@@ -38,7 +38,7 @@ const routes = [
       {
         path: '/my',
         component: () => {
-          return import('@/views/My')
+          return import('@/views/my')
         }
       }
     ]
