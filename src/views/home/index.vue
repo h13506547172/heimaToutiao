@@ -15,17 +15,35 @@
         ><articleList :id="item.id"></articleList
       ></van-tab>
       <!-- 汉堡按钮 -->
-      <span class="iconfont icon-gengduo"></span>
+      <span class="iconfont icon-gengduo" @click="isShowFn"></span>
     </van-tabs>
+    <!-- 汉堡弹出层 -->
+    <morePopup
+      ref="popup"
+      :myChannel="userChannel"
+      @filterArr="filterArrFn"
+      @changeCur="changeCurFn"
+      @addChannel="addChannelFn"
+    ></morePopup>
   </div>
 </template>
 
 <script>
 import articleList from './articleList.vue'
-import { getChannelsAPI } from '@/api/index'
+import { getChannelsAPI, delChannelsAPI, addChannelAPI } from '@/api/index'
+import morePopup from './morePopup.vue'
+// 引入存储频道到本地的方法
+import { getChannelByLocal, setChannelByLocal } from '@/api/channels'
+
 export default {
+  computed: {
+    isLogin() {
+      return !!this.$store.state.userToken.token
+    }
+  },
   components: {
-    articleList
+    articleList,
+    morePopup
   },
   data() {
     return {
@@ -34,6 +52,23 @@ export default {
     }
   },
   methods: {
+    // 添加用户频道
+    async addChannel(id, seq) {
+      try {
+        await addChannelAPI(id, seq)
+      } catch (error) {
+        this.$toast.fail('添加频道失败')
+      }
+    },
+    // 删除用户频道
+    async delChannel(id) {
+      try {
+        await delChannelsAPI(id)
+      } catch (error) {
+        this.$toast.fail('删除频道失败')
+      }
+    },
+    // 获取用户频道
     async getUserChannel() {
       try {
         const res = await getChannelsAPI()
@@ -41,10 +76,57 @@ export default {
       } catch (err) {
         this.$toast.fail('获取用户列表失败')
       }
+    },
+    // 显示弹出层
+    isShowFn() {
+      this.$refs.popup.show = true
+    },
+    // 筛选数组删除我的频道
+    filterArrFn(id) {
+      this.userChannel = this.userChannel.filter((item) => {
+        return item.id !== id
+      })
+      // 如果处于离线状态就存到本地
+      if (!this.isLogin) {
+        setChannelByLocal(this.userChannel)
+      } else {
+        // 登录状态发请求删除
+        this.delChannel(id)
+      }
+      this.$toast.success('删除频道成功')
+    },
+    // 添加我的频道
+    addChannelFn(channel) {
+      console.log(channel)
+      this.userChannel.push(channel)
+      // 如果处于离线状态就存到本地
+      if (!this.isLogin) {
+        setChannelByLocal(this.userChannel)
+      } else {
+        // 登录状态就添加
+        this.addChannel(channel.id, this.userChannel.length)
+      }
+      this.$toast.success('添加频道成功')
+    },
+    // 点击汉堡中的按钮改变
+    changeCurFn(index) {
+      this.active = index
     }
   },
+  // 第一次axios请求数据
   created() {
-    this.getUserChannel()
+    // 如果本地没有数据就请求数据
+    if (!this.isLogin) {
+      // 本地取不到数据就发请求
+      if (!getChannelByLocal()) {
+        this.getUserChannel()
+      } else {
+        // console.log(getChannelByLocal())
+        this.userChannel = getChannelByLocal()
+      }
+    } else {
+      this.getUserChannel()
+    }
   }
 }
 </script>
@@ -105,6 +187,8 @@ export default {
 
   /* 字体图标 */
   .icon-gengduo {
+    // 提高层级 不然触发不了点击事件
+    z-index: 99;
     position: absolute;
     top: 0;
     right: 0;
@@ -126,6 +210,27 @@ export default {
       width: 1px;
       background-image: url('~@/assets/image/gradient-gray-line.png');
     }
+  }
+  // 头部固定的样式
+  .navbar {
+    position: sticky;
+    top: 0;
+    left: 0;
+  }
+  :deep(.van-tabs__wrap) {
+    position: sticky;
+    top: 92px;
+    left: 0;
+    z-index: 99;
+  }
+  .toutiao-gengduo {
+    position: fixed;
+    top: 92px;
+  }
+
+  :deep(.van-tabs__content) {
+    max-height: calc(100vh - 92px - 82px - 100px);
+    overflow: auto;
   }
 }
 </style>
