@@ -4,6 +4,13 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
 const routes = [
+  // 搜索页面
+  {
+    path: '/search',
+    component: () => {
+      return import('@/views/search')
+    }
+  },
   {
     path: '/login',
     component: () => {

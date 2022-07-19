@@ -3,7 +3,7 @@
     <!--  顶部搜索 -->
     <van-nav-bar class="navbar">
       <template #title>
-        <van-button type="default" round>
+        <van-button type="default" round @click="goSearch">
           <i class="iconfont icon-sousuo"></i>
           搜索
         </van-button>
@@ -52,6 +52,10 @@ export default {
     }
   },
   methods: {
+    // 跳转到search
+    goSearch() {
+      this.$router.push('/search')
+    },
     // 添加用户频道
     async addChannel(id, seq) {
       try {
