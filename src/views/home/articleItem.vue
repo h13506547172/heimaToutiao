@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @click="goArticle">
     <!-- 一张图片 -->
     <van-cell
       v-if="obj.cover.type === 1"
@@ -41,6 +41,16 @@ export default {
     articleLabel() {
       const time = dayjs(this.obj.pubdate).fromNow()
       return `${this.obj.aut_name} ${this.obj.comm_count}评论 ${time}`
+    }
+  },
+  methods: {
+    // 点击进入文章详细
+    goArticle() {
+      // console.log(this.obj)
+      this.$router.push({
+        name: 'article',
+        params: { id: this.obj.art_id }
+      })
     }
   }
 }

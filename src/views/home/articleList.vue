@@ -1,6 +1,10 @@
 <template>
   <div class="article-page">
-    <van-pull-refresh v-model="refreshing" @refresh="onRefresh" success-text="刷新成功">
+    <van-pull-refresh
+      v-model="refreshing"
+      @refresh="onRefresh"
+      success-text="刷新成功"
+    >
       <!-- offset 表示触底距离 -->
       <van-list
         :immediate-check="false"
