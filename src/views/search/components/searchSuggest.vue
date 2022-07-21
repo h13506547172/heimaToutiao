@@ -1,11 +1,15 @@
 <template>
   <div class="suggest-page">
-    <van-cell v-for="(item, index) in curSuggestionList" :key="index">
+    <van-cell
+      v-for="(item, index) in curSuggestionList"
+      :key="index"
+      @click="passFn(item)"
+    >
       <template #icon>
         <van-icon name="search" />
       </template>
       <template #title>
-        <span v-html="item"></span>
+        <span v-html="item" ref="text"></span>
       </template>
     </van-cell>
   </div>
@@ -16,7 +20,9 @@ import { suggestionAPI } from '@/api/index'
 export default {
   data() {
     return {
-      suggestionList: []
+      suggestionList: [],
+      // 防抖
+      timer: null
     }
   },
   props: {
@@ -31,7 +37,10 @@ export default {
       // 创建组件的时候就要监视变化
       immediate: true,
       handler() {
-        this.getSuggestion(this.iptVal)
+        window.clearTimeout(this.timer)
+        this.timer = window.setTimeout(() => {
+          this.getSuggestion(this.iptVal)
+        }, 500)
       }
     }
   },
@@ -47,6 +56,12 @@ export default {
       } catch (error) {
         console.log(error)
       }
+    },
+    passFn(val) {
+      // 通过正则匹配去掉html标签
+      val = val.replace(/<[^>]*>|<\/[^>]*>/gm, '')
+      console.log(val)
+      this.$emit('clickSearch', val)
     }
   },
   computed: {

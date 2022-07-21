@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="search-page">
     <!-- 搜索栏 -->
     <form action="/">
       <van-search
@@ -14,7 +14,13 @@
       />
     </form>
     <!-- 搜索历史/建议/结果 -->
-    <component :is="componentName" :iptVal="iptVal"></component>
+    <component
+      :is="componentName"
+      :iptVal="iptVal"
+      :ResultList="ResultList"
+      :q="iptVal"
+      @clickSearch="clickSearchFn"
+    ></component>
   </div>
 </template>
 
@@ -22,6 +28,8 @@
 import searchHistory from './components/searchHistory.vue'
 import searchResult from './components/searchResult.vue'
 import searchSuggest from './components/searchSuggest.vue'
+import { resultAPI } from '@/api/index'
+import { setItem, getItem } from '@/utils/localStorage'
 
 export default {
   computed: {
@@ -45,14 +53,30 @@ export default {
   data() {
     return {
       iptVal: '',
-      searchResultShow: false
+      searchResultShow: false,
+      // 搜索结果列表
+      ResultList: [],
+      historyList: getItem() || []
     }
   },
   methods: {
+    // resultAPI 获取搜索结果
+    async getResult(q) {
+      try {
+        const res = await resultAPI(q)
+        // console.log(res)
+        this.ResultList = res.data.data.results
+      } catch (error) {
+        this.$toast.fail('获取搜索结果失败')
+      }
+    },
     // 按下回车触发搜索事件，还有手机小键盘中的搜索
-    onSearch(val) {
-      console.log(val)
+    async onSearch() {
+      await this.getResult(this.iptVal)
       this.searchResultShow = true
+      // 存储历史到本地
+      this.historyList.push(this.iptVal)
+      setItem('SEARCH_HIS', this.historyList)
     },
     onCancel() {
       this.$router.go(-1)
@@ -61,12 +85,21 @@ export default {
     showSearchSuggest() {
       // 让结果不显示，那就是历史和建议二选一
       this.searchResultShow = false
+    },
+    // 点击搜索建议触发
+    clickSearchFn(val) {
+      this.iptVal = val
+      this.onSearch()
     }
   }
 }
 </script>
 
 <style lang="less" scoped>
+.search-page {
+  background-color: #f5f5f9;
+  height: 1334px;
+}
 .searchIpt {
   .van-search__action {
     color: #fff;
