@@ -21,7 +21,7 @@
           </van-col>
           <van-col span="9">
             <van-row type="flex" justify="end" align="center">
-              <van-button round class="codeBtn">编辑信息</van-button>
+              <van-button round class="codeBtn" @click="$router.push('/user')">编辑信息</van-button>
             </van-row>
           </van-col>
         </van-row>

@@ -9,6 +9,10 @@ import '@/assets/font/iconfont.css'
 // 引入vant组件
 import Vant from 'vant'
 import 'vant/lib/index.css'
+// 图片裁剪工具
+import VueCropper from 'vue-cropper'
+Vue.use(VueCropper)
+
 Vue.use(Vant)
 
 Vue.config.productionTip = false
@@ -16,5 +20,5 @@ Vue.config.productionTip = false
 new Vue({
   router,
   store,
-  render: h => h(App)
+  render: (h) => h(App)
 }).$mount('#app')

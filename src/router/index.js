@@ -4,6 +4,13 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
 const routes = [
+  // user页面
+  {
+    path: '/user',
+    component: () => {
+      return import('@/views/user')
+    }
+  },
   // 文章详情页面
   {
     path: '/article/:id',
