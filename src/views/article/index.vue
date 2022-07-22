@@ -200,7 +200,12 @@
         </van-list>
       </div>
       <!-- 楼中楼底部评论按钮 -->
-      <van-button round type="primary" size="large" class="comInComBtn"
+      <van-button
+        round
+        type="primary"
+        size="large"
+        class="comInComBtn"
+        @click="showComIncomArea"
         >发布评论</van-button
       >
     </van-popup>
@@ -219,7 +224,12 @@ import {
 } from '@/api/article'
 // 时间处理
 import dayjs from '@/utils/dayjs'
+// 引入图片预览
+import { ImagePreview } from 'vant'
 export default {
+  components: {
+    [ImagePreview.Component.name]: ImagePreview.Component
+  },
   data() {
     return {
       // 文章信息
@@ -242,7 +252,8 @@ export default {
       finishedComInCom: false,
       // 关注按钮
       isFollowed: false,
-      isCollected: false
+      isCollected: false,
+      flag: 1 // 1表示对当前文章评论
     }
   },
   computed: {
@@ -315,24 +326,39 @@ export default {
       await this.getArtComment('a', this.$route.params.id, this.lastCommitId)
     },
     // 发布评论发起请求的方法
-    async releaseComment(target, val) {
+    async releaseComment(target, val, id) {
       // 对当前文章发布评论
       try {
-        await releaseCommentAPI(target, val)
+        await releaseCommentAPI(target, val, id)
         this.$toast.success('发布评论成功')
       } catch (error) {
         this.$toast.fail('发布评论失败')
       }
     },
     // 发布评论
-    async releaseFn() {
-      // 对当前文章评论
-      await this.releaseComment(this.$route.params.id, this.comArea)
-      this.showComArea = false
-      this.artCommentList = []
-      // 更新页面
-      await this.getArtComment('a', this.$route.params.id)
-      await this.geiContent('a', this.$route.params.id)
+    async releaseFn(comIncom) {
+      if (comIncom === 1) {
+        // 对当前文章评论
+        await this.releaseComment(this.$route.params.id, this.comArea)
+        this.showComArea = false
+        this.artCommentList = []
+        // 更新页面
+        await this.getArtComment('a', this.$route.params.id)
+        await this.geiContent('a', this.$route.params.id)
+      } else {
+        console.log(this.$route.params.id)
+        // 楼中楼评论
+        await this.releaseComment(
+          this.ComInComInfo.com_id,
+          this.comArea,
+          this.$route.params.id
+        )
+        this.showComArea = false
+        // 更新页面
+        this.ComInComAll = []
+        this.finishedComInCom = false
+        await this.getComInComment('c', this.ComInComInfo.com_id)
+      }
     },
     // 显示楼中楼
     async showComInComFn(obj) {
@@ -383,6 +409,11 @@ export default {
       } catch (error) {
         this.$toast.fail('取消关注失败')
       }
+    },
+    // 弹出评论框楼中楼
+    showComIncomArea() {
+      this.showComArea = true
+      this.flag = 0
     }
   },
   async created() {
@@ -392,6 +423,27 @@ export default {
     await this.getArtComment('a', this.$route.params.id)
     this.isFollowed = this.artInfo.is_followed
     this.isCollected = this.artInfo.is_collected
+  },
+  mounted() {
+    // 图片预览
+    this.$nextTick(function () {
+      const main = document.querySelector('.main')
+      // console.log(main)
+      main.addEventListener('click', function (e) {
+        const imgs = document.querySelectorAll('.main img')
+        // console.log(imgs)
+        const arr = []
+        imgs.forEach((item) => {
+          arr.push(item.currentSrc)
+        })
+        if (e.target.src) {
+          const startPosition = arr.findIndex((item) => {
+            return item === e.target.src
+          })
+          ImagePreview({ images: arr, startPosition })
+        }
+      })
+    })
   }
 }
 </script>
