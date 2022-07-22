@@ -74,8 +74,10 @@ export default {
     async onSearch() {
       await this.getResult(this.iptVal)
       this.searchResultShow = true
-      // 存储历史到本地
-      this.historyList.push(this.iptVal)
+      // 存储历史到本地,并进行去重
+      this.historyList.unshift(this.iptVal)
+      // console.log(this.historyList)
+      this.historyList = [...new Set(this.historyList)]
       setItem('SEARCH_HIS', this.historyList)
     },
     onCancel() {

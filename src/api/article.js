@@ -37,3 +37,52 @@ export const releaseCommentAPI = (target, content, artId) => {
     }
   })
 }
+// 关注用户
+export const attentionAPI = (target) => {
+  return request({
+    method: 'POST',
+    url: '/v1_0/user/followings',
+    headers: { 'Content-Type': 'application/json' },
+    data: {
+      // 关注id
+      target
+    }
+  })
+}
+// 取消关注
+export const cancelAttentionAPI = (target) => {
+  return request({
+    method: 'DELETE',
+    url: '/v1_0/user/followings/:target',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    data: {
+      // 关注id
+      target
+    }
+  })
+}
+
+// 收藏文章
+export const collectArtAPI = (target) => {
+  return request({
+    method: 'POST',
+    url: '/v1_0/article/collections',
+    headers: { 'Content-Type': 'application/json' },
+    data: {
+      // 文章id
+      target
+    }
+  })
+}
+// 取消收藏
+export const cancelCollectAPI = (target) => {
+  return request({
+    method: 'DELETE',
+    url: '/v1_0/article/collections/:target',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    data: {
+      // 取消收藏id
+      target
+    }
+  })
+}

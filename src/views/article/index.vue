@@ -20,7 +20,16 @@
         <p class="time">{{ articleLabel }}</p>
       </template>
       <template>
-        <van-button round type="info"><van-icon name="plus" />关注</van-button>
+        <van-button
+          round
+          type="info"
+          @click="attentionAuthor"
+          v-if="!isFollowed"
+          ><van-icon name="plus" />关注</van-button
+        >
+        <van-button round type="info" @click="cancelAttention" v-else
+          ><van-icon name="success" />已关注</van-button
+        >
       </template>
     </van-cell>
     <!-- 文章内容 -->
@@ -75,7 +84,11 @@
           >写评论</van-button
         >
         <van-icon name="comment-o" :badge="artInfo.comm_count" />
-        <van-icon name="star-o" />
+        <van-icon
+          name="star-o"
+          :class="{ shoucang: isCollected }"
+          @click="collectArt"
+        />
         <van-icon name="good-job-o" />
         <van-icon name="share" />
       </template>
@@ -195,7 +208,15 @@
 </template>
 
 <script>
-import { articleConAPI, commentAPI, releaseCommentAPI } from '@/api/article'
+import {
+  articleConAPI,
+  commentAPI,
+  releaseCommentAPI,
+  attentionAPI,
+  cancelAttentionAPI,
+  collectArtAPI,
+  cancelCollectAPI
+} from '@/api/article'
 // 时间处理
 import dayjs from '@/utils/dayjs'
 export default {
@@ -218,7 +239,10 @@ export default {
       ComInComAll: [],
       lastComInComId: '',
       loadingComInCom: false,
-      finishedComInCom: false
+      finishedComInCom: false,
+      // 关注按钮
+      isFollowed: false,
+      isCollected: false
     }
   },
   computed: {
@@ -319,6 +343,46 @@ export default {
     // 关闭楼中楼
     ClickLeftComCom() {
       this.showComInCom = false
+    },
+    // 关注用户
+    async attentionAuthor() {
+      try {
+        await attentionAPI(this.artInfo.aut_id)
+        this.isFollowed = true
+      } catch (error) {
+        this.$toast.fail('关注失败')
+      }
+    },
+    // 取消关注用户
+    async cancelAttention() {
+      try {
+        await cancelAttentionAPI(this.artInfo.aut_id)
+        this.isFollowed = false
+      } catch (error) {
+        this.$toast.fail('取消关注失败')
+      }
+    },
+    // 收藏文章
+    async collectArt() {
+      // 如果未收藏就收藏
+      if (this.isCollected === false) {
+        try {
+          await collectArtAPI(this.artInfo.art_id)
+          this.isCollected = true
+          this.$toast.success('收藏成功')
+        } catch (error) {
+          this.$toast.fail('收藏失败')
+        }
+        return
+      }
+      // 已收藏就取消
+      try {
+        await cancelCollectAPI(this.artInfo.art_id)
+        this.isCollected = false
+        this.$toast.success('取消收藏成功')
+      } catch (error) {
+        this.$toast.fail('取消关注失败')
+      }
     }
   },
   async created() {
@@ -326,6 +390,8 @@ export default {
     await this.geiContent('a', this.$route.params.id)
     // 获取文章评论内容
     await this.getArtComment('a', this.$route.params.id)
+    this.isFollowed = this.artInfo.is_followed
+    this.isCollected = this.artInfo.is_collected
   }
 }
 </script>
@@ -454,6 +520,9 @@ export default {
     .mainCom {
       padding-bottom: 100px;
     }
+  }
+  .shoucang {
+    color: #3296fa;
   }
 }
 </style>
