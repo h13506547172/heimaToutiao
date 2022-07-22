@@ -267,15 +267,24 @@ export default {
       try {
         const res = await commentAPI(type, id, offset)
         // console.log(res)
+        // 没有数据就设置加载完成
+        if (res.data.data.results.length === 0) {
+          return (this.finishedComInCom = true)
+        }
         this.ComInComAll.push(...res.data.data.results)
         this.lastComInComId = res.data.data.end_id
+        this.loadingComInCom = false
       } catch (error) {
         this.$toast.fail('获取评论失败')
       }
     },
     // 楼中楼列表加载更多
     async onLoadComInCom() {
-      await this.getComInComment('c', this.ComInComInfo.com_id, this.lastComInComId)
+      await this.getComInComment(
+        'c',
+        this.ComInComInfo.com_id,
+        this.lastComInComId
+      )
     },
     // 加载文章更多评论
     async onLoadCom() {
@@ -305,7 +314,7 @@ export default {
     async showComInComFn(obj) {
       this.showComInCom = true
       this.ComInComInfo = obj
-      await this.getComInComment('c', this.ComInComInfo.com_id)
+      // await this.getComInComment('c', this.ComInComInfo.com_id)
     },
     // 关闭楼中楼
     ClickLeftComCom() {
