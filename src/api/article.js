@@ -78,11 +78,27 @@ export const collectArtAPI = (target) => {
 export const cancelCollectAPI = (target) => {
   return request({
     method: 'DELETE',
-    url: '/v1_0/article/collections/:target',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    url: '/v1_0/article/collections/' + target,
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+  })
+}
+// 楼中楼点赞
+export const goodJobAPI = (target) => {
+  return request({
+    method: 'POST',
+    url: '/v1_0/comment/likings',
+    headers: { 'Content-Type': 'application/json' },
     data: {
-      // 取消收藏id
+      // 被点赞的评论id
       target
     }
+  })
+}
+// 取消点赞
+export const cancelgoodJobAPI = (target) => {
+  return request({
+    method: 'DELETE',
+    url: '/v1_0/comment/likings/' + target,
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   })
 }

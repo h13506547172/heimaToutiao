@@ -165,6 +165,7 @@
           :finished="finishedComInCom"
           finished-text="没有更多了"
           @load="onLoadComInCom"
+          :immediate-check="false"
         >
           <van-cell
             :title="ComInComInfo.aut_name"
@@ -193,8 +194,16 @@
               </p>
             </template>
             <template>
-              <van-icon name="good-job-o" />
-              <span>赞</span>
+              <div
+                @click="comInComGoodjob(item)"
+                :class="{ curGoodJob: item.is_liking }"
+              >
+                <van-icon name="good-job-o" />
+                <span>赞</span>
+                <span v-show="item.like_count !== 0">{{
+                  item.like_count
+                }}</span>
+              </div>
             </template>
           </van-cell>
         </van-list>
@@ -220,7 +229,9 @@ import {
   attentionAPI,
   cancelAttentionAPI,
   collectArtAPI,
-  cancelCollectAPI
+  cancelCollectAPI,
+  goodJobAPI,
+  cancelgoodJobAPI
 } from '@/api/article'
 // 时间处理
 import dayjs from '@/utils/dayjs'
@@ -331,13 +342,18 @@ export default {
       try {
         await releaseCommentAPI(target, val, id)
         this.$toast.success('发布评论成功')
+        this.comArea = ''
       } catch (error) {
         this.$toast.fail('发布评论失败')
       }
     },
     // 发布评论
-    async releaseFn(comIncom) {
-      if (comIncom === 1) {
+    async releaseFn() {
+      // 如果处于楼中楼状态就评论楼中楼
+      if (this.showComInCom) {
+        this.flag = 0
+      }
+      if (this.flag === 1) {
         // 对当前文章评论
         await this.releaseComment(this.$route.params.id, this.comArea)
         this.showComArea = false
@@ -346,7 +362,7 @@ export default {
         await this.getArtComment('a', this.$route.params.id)
         await this.geiContent('a', this.$route.params.id)
       } else {
-        console.log(this.$route.params.id)
+        // console.log(this.$route.params.id)
         // 楼中楼评论
         await this.releaseComment(
           this.ComInComInfo.com_id,
@@ -355,16 +371,26 @@ export default {
         )
         this.showComArea = false
         // 更新页面
+        this.artCommentList = []
+        await this.getArtComment('a', this.$route.params.id)
         this.ComInComAll = []
-        this.finishedComInCom = false
+        this.lastComInComId = ''
         await this.getComInComment('c', this.ComInComInfo.com_id)
+        this.ComInComInfo = this.artCommentList.find((item) => {
+          return item.com_id === this.ComInComInfo.com_id
+        })
+        // 重置为评论文章状态
+        this.flag = 1
+        this.finishedComInCom = false
       }
     },
     // 显示楼中楼
     async showComInComFn(obj) {
       this.showComInCom = true
       this.ComInComInfo = obj
-      // await this.getComInComment('c', this.ComInComInfo.com_id)
+      this.ComInComAll = []
+      this.finishedComInCom = false
+      await this.getComInComment('c', this.ComInComInfo.com_id)
     },
     // 关闭楼中楼
     ClickLeftComCom() {
@@ -413,9 +439,39 @@ export default {
     // 弹出评论框楼中楼
     showComIncomArea() {
       this.showComArea = true
-      this.flag = 0
+    },
+    // 楼中楼点赞
+    async comInComGoodjob(item) {
+      console.log(item)
+      if (!item.is_liking) {
+        // 点赞的情况
+        try {
+          await goodJobAPI(item.com_id)
+          this.$toast.success('点赞成功')
+          // 更新页面
+          this.ComInComAll = []
+          this.lastComInComId = ''
+          await this.getComInComment('c', this.ComInComInfo.com_id)
+        } catch (error) {
+          this.$toast.fail('点赞失败')
+        }
+      } else {
+        //  取消楼中楼点赞
+        try {
+          const res = await cancelgoodJobAPI(item.com_id)
+          console.log(res)
+          this.$toast.success('取消点赞成功')
+          // 更新页面
+          this.ComInComAll = []
+          this.lastComInComId = ''
+          await this.getComInComment('c', this.ComInComInfo.com_id)
+        } catch (error) {
+          this.$toast.fail('取消点赞失败')
+        }
+      }
     }
   },
+  // cerated阶段
   async created() {
     // 获取新闻内容
     await this.geiContent('a', this.$route.params.id)
@@ -574,6 +630,9 @@ export default {
     }
   }
   .shoucang {
+    color: #3296fa;
+  }
+  .curGoodJob {
     color: #3296fa;
   }
 }
