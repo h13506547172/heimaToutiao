@@ -492,7 +492,8 @@ export default {
         imgs.forEach((item) => {
           arr.push(item.currentSrc)
         })
-        if (e.target.src) {
+        // 判断元素是不是img图片
+        if (e.target.nodeName === 'IMG') {
           const startPosition = arr.findIndex((item) => {
             return item === e.target.src
           })
